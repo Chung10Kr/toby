@@ -16,9 +16,7 @@ import org.junit.Test;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -82,48 +80,6 @@ public class UserServiceTest {
 		assertThat(updated.getLevel(), is(expectedLevel));
 	}
 
-	
-	static class MockUserDao implements UserDao { 
-		private List<User> users;  
-		private List<User> updated = new ArrayList(); 
-		
-		private MockUserDao(List<User> users) {
-			this.users = users;
-		}
-
-		public List<User> getUpdated() {
-			return this.updated;
-		}
-
-		public List<User> getAll() {  
-			return this.users;
-		}
-
-		public void update(User user) {  
-			updated.add(user);
-		}
-		
-		public void add(User user) { throw new UnsupportedOperationException(); }
-		public void deleteAll() { throw new UnsupportedOperationException(); }
-		public User get(String id) { throw new UnsupportedOperationException(); }
-		public int getCount() { throw new UnsupportedOperationException(); }
-	}
-
-	
-	static class MockMailSender implements MailSender {
-		private List<String> requests = new ArrayList<String>();	
-		
-		public List<String> getRequests() {
-			return requests;
-		}
-
-		public void send(SimpleMailMessage mailMessage) throws MailException {
-			requests.add(mailMessage.getTo()[0]);  
-		}
-
-		public void send(SimpleMailMessage[] mailMessage) throws MailException {
-		}
-	}
 
 
 	private void checkLevelUpgraded(User user, boolean upgraded) {
@@ -172,8 +128,7 @@ public class UserServiceTest {
 			fail("TestUserServiceException expected"); 
 		}
 		catch(TestUserServiceException e) { 
-			e.printStackTrace();
-			System.out.println("=============");
+
 		}
 		
 		checkLevelUpgraded(users.get(1), false);
