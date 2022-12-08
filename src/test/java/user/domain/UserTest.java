@@ -9,12 +9,10 @@ import org.junit.runner.JUnitCore;
 
 public class UserTest {
 	User user;
-	
 
 	public static void main(String[] args) {
 		JUnitCore.main("user.domain.UserTest");
 	}
-
 
 	@Before
 	public void setUp() {

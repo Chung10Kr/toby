@@ -14,31 +14,23 @@ public class UserServiceTx implements UserService{
     public void setUserService(UserService userService){
         this.userService = userService;
     }
-
-
 	public void setTransactionManager(PlatformTransactionManager transactionManager){
 		this.transactionManager = transactionManager;
 	}
-
-
     @Override
     public void add(User user) {
-        userService.add(user);
+        this.userService.add(user);
     }
-
     @Override
     public void upgradeLevels() {
 
 		TransactionStatus status = this.transactionManager.getTransaction(new DefaultTransactionDefinition());
 		try{
-			userService.upgradeLevels();
+			this.userService.upgradeLevels();
 			this.transactionManager.commit(status);
 		}catch(RuntimeException e){
 			this.transactionManager.rollback(status);
             throw e;
 		}
-        
-        
     }
-    
 }

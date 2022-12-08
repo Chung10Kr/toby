@@ -8,6 +8,7 @@ import static org.mockito.Mockito.*;
 import static user.service.UserServiceImpl.MIN_LOGCOUNT_FOR_SILVER;
 import static user.service.UserServiceImpl.MIN_RECCOMEND_FOR_GOLD;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -44,6 +45,10 @@ public class UserServiceTest {
 	public static void main(String[] args) {
 		JUnitCore.main("user.service.UserServiceTest");
 	}
+	@Test
+	public void DecoratorTest(){
+		userService.upgradeLevels();
+	}
 
 	@Before
 	public void setUp() {
@@ -59,7 +64,6 @@ public class UserServiceTest {
 	@Test 
 	public void upgradeLevels() throws Exception {
 		UserServiceImpl userServiceImpl = new UserServiceImpl(); 
-
 		MockUserDao mockUserDao = new MockUserDao(this.users);  
 		userServiceImpl.setUserDao(mockUserDao);
 

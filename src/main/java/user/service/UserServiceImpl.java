@@ -64,3 +64,4 @@ public class UserServiceImpl implements UserService {
 		userDao.add(user);
 	}
 }
+
