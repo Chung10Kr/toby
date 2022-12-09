@@ -19,8 +19,12 @@ import org.junit.runner.JUnitCore;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+
+import java.lang.reflect.Proxy;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -34,6 +38,7 @@ import user.domain.User;
 @ContextConfiguration(locations="/test-applicationContext.xml")
 public class UserServiceTest {
 
+	@Autowired ApplicationContext context;
 	@Autowired UserService userService;	
 	@Autowired UserDao userDao;
 	@Autowired UserServiceImpl userServiceImpl;
@@ -143,32 +148,7 @@ public class UserServiceTest {
 		assertThat(userWithLevelRead.getLevel(), is(userWithLevel.getLevel())); 
 		assertThat(userWithoutLevelRead.getLevel(), is(Level.BASIC));
 	}
- 
-	@Test
-	public void upgradeAllOrNothing() {
-		TestUserService testUserService = new TestUserService(users.get(3).getId());
-		testUserService.setUserDao(userDao);
-		testUserService.setMailSender(mailSender);
-		
-		UserServiceTx txUserService = new UserServiceTx();
-		txUserService.setTransactionManager(transactionManager);
-		txUserService.setUserService(testUserService);
-		 
-		userDao.deleteAll();			  
-		for(User user : users) userDao.add(user);
-		
-		try {
-			txUserService.upgradeLevels();   
-			fail("TestUserServiceException expected"); 
-		}
-		catch(TestUserServiceException e) { 
 
-		}
-		
-		checkLevelUpgraded(users.get(1), false);
-	}
-
-	
 	static class TestUserService extends UserServiceImpl {
 		private String id;
 		
@@ -186,5 +166,33 @@ public class UserServiceTest {
 	
 	static class TestUserServiceException extends RuntimeException {
 	}
+
+
+
+	@Test
+	@DirtiesContext
+	public void upgradeAllOrNothing() throws Exception{
+		TestUserService testUserService = new TestUserService(users.get(3).getId());
+		testUserService.setUserDao(userDao);
+		testUserService.setMailSender(mailSender);
+		
+		TxProxyFactoryBean txProxyFactoryBean = context.getBean("&userService" , TxProxyFactoryBean.class );
+		txProxyFactoryBean.setTarget(testUserService);
+		UserService txUserService = (UserService) txProxyFactoryBean.getObject();
+
+		userDao.deleteAll();			  
+		for(User user : users) userDao.add(user);
+		
+		try {
+			txUserService.upgradeLevels();   
+			fail("TestUserServiceException expected"); 
+		}
+		catch(TestUserServiceException e) { 
+
+		}
+		
+		checkLevelUpgraded(users.get(1), false);
+	}
+	
 }
 
