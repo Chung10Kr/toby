@@ -50,6 +50,8 @@ public class UserServiceTest {
 	public static void main(String[] args) {
 		JUnitCore.main("user.service.UserServiceTest");
 	}
+
+
 	@Test
 	public void DecoratorTest(){
 		userService.upgradeLevels();
@@ -193,6 +195,5 @@ public class UserServiceTest {
 		
 		checkLevelUpgraded(users.get(1), false);
 	}
-	
 }
 
