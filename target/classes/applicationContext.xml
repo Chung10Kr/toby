@@ -12,33 +12,23 @@
 		<property name="password" value="book" />
 	</bean>
 	
-	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
-        <constructor-arg>
-            <ref bean="dataSource"/>
-        </constructor-arg>
-        <property name="dataSource" ref="dataSource"></property>
-    </bean>
-	
 	<bean id="userDao" class="user.dao.UserDaoJdbc">
 		<property name="dataSource" ref="dataSource" />
 	</bean> 
-	
-	<bean id="userService" class="user.service.UserServiceTx">  
-		<property name="transactionManager" ref="transactionManager" />
-		<property name="userService" ref="userServiceImpl" />  
+
+	<bean id="userService" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="target" ref="userServiceImpl" />
+		<property name="interceptorNames">
+			<list>
+				<value>transactionAdvisor</value>
+			</list>
+		</property>
 	</bean>
-	
+
 	<bean id="userServiceImpl" class="user.service.UserServiceImpl">
 		<property name="userDao" ref="userDao" />
 		<property name="mailSender" ref="mailSender" />
 	</bean>	
-
-
-	<!-- 
-	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
-		<property name="host" value="mail.server.com" />
-	</bean>
-		-->
 	<bean id="mailSender" class="user.service.DummyMailSender" />
 		
 	
@@ -47,4 +37,14 @@
 		<property name="dataSource" ref="dataSource" />  
 	</bean>
 
+	<bean id="transactionAdvice" class="user.service.TransactionAdvice">
+		<property name="transactionManager" ref="transactionManager" ></property>
+	</bean>
+	<bean id="transactionPointcut" class="org.springframework.aop.support.NameMatchMethodPointcut">
+		<property name="mappedName" value="upgrade*" />
+	</bean>
+	<bean id="transactionAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor">
+		<property name="advice" ref="transactionAdvice" />
+		<property name="pointcut" ref="transactionPointcut" />
+	</bean>
 </beans>
