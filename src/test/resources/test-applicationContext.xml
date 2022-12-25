@@ -30,17 +30,16 @@
 	<bean id="transactionAdvice" class="user.service.TransactionAdvice">
 		<property name="transactionManager" ref="transactionManager" ></property>
 	</bean>
-	<bean id="transactionPointcut" class="user.service.NameMatchClassMethodPointcut">
-		<property name="mappedClassName" value="*ServiceImpl"/>
-		<property name="mappedName" value="upgrade*" />
+	<bean id="transactionPointcut" class="org.springframework.aop.aspectj.AspectJExpressionPointcut">
+		<property name="expression" value="execution(* *..*ServiceImpl.upgrade*(..))" />
 	</bean>
+
 	<bean id="transactionAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor">
 		<property name="advice" ref="transactionAdvice" />
 		<property name="pointcut" ref="transactionPointcut" />
 	</bean>
 
 	<bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"></bean>
-	
 	<bean id="tetsUserService"
 		class="user.service.UserServiceTest$TestUserServiceImpl"
 		parent="userService" 
