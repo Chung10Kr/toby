@@ -16,16 +16,7 @@
 		<property name="dataSource" ref="dataSource" />
 	</bean> 
 
-	<bean id="userService" class="org.springframework.aop.framework.ProxyFactoryBean">
-		<property name="target" ref="userServiceImpl" />
-		<property name="interceptorNames">
-			<list>
-				<value>transactionAdvisor</value>
-			</list>
-		</property>
-	</bean>
-
-	<bean id="userServiceImpl" class="user.service.UserServiceImpl">
+	<bean id="userService" class="user.service.UserServiceImpl">
 		<property name="userDao" ref="userDao" />
 		<property name="mailSender" ref="mailSender" />
 	</bean>	
@@ -39,11 +30,20 @@
 	<bean id="transactionAdvice" class="user.service.TransactionAdvice">
 		<property name="transactionManager" ref="transactionManager" ></property>
 	</bean>
-	<bean id="transactionPointcut" class="org.springframework.aop.support.NameMatchMethodPointcut">
+	<bean id="transactionPointcut" class="user.service.NameMatchClassMethodPointcut">
+		<property name="mappedClassName" value="*ServiceImpl"/>
 		<property name="mappedName" value="upgrade*" />
 	</bean>
 	<bean id="transactionAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor">
 		<property name="advice" ref="transactionAdvice" />
 		<property name="pointcut" ref="transactionPointcut" />
 	</bean>
+
+	<bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"></bean>
+	
+	<bean id="tetsUserService"
+		class="user.service.UserServiceTest$TestUserServiceImpl"
+		parent="userService" 
+	></bean>
+
 </beans>

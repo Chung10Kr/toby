@@ -42,7 +42,8 @@ public class UserServiceTest {
 	@Autowired ApplicationContext context;
 	@Autowired UserService userService;	
 	@Autowired UserDao userDao;
-	@Autowired UserServiceImpl userServiceImpl;
+	@Autowired UserService tetsUserService;
+
 	@Autowired MailSender mailSender;
 	@Autowired PlatformTransactionManager transactionManager;
 	
@@ -152,12 +153,8 @@ public class UserServiceTest {
 		assertThat(userWithoutLevelRead.getLevel(), is(Level.BASIC));
 	}
 
-	static class TestUserService extends UserServiceImpl {
-		private String id;
-		
-		private TestUserService(String id) {  
-			this.id = id;
-		}
+	static class TestUserServiceImpl extends UserServiceImpl {
+		private String id = "madnite1";
 
 		protected void upgradeLevel(User user) {
 			if (user.getId().equals(this.id)){
@@ -171,23 +168,14 @@ public class UserServiceTest {
 	}
 
 
-
 	@Test
-	@DirtiesContext
 	public void upgradeAllOrNothing() throws Exception{
-		TestUserService testUserService = new TestUserService(users.get(3).getId());
-		testUserService.setUserDao(userDao);
-		testUserService.setMailSender(mailSender);
-		
-		ProxyFactoryBean txProxyFactoryBean = context.getBean("&userService" , ProxyFactoryBean.class );
-		txProxyFactoryBean.setTarget(testUserService);
-		UserService txUserService = (UserService) txProxyFactoryBean.getObject();
 
 		userDao.deleteAll();			  
 		for(User user : users) userDao.add(user);
 		
 		try {
-			txUserService.upgradeLevels();   
+			this.tetsUserService.upgradeLevels();   
 			fail("TestUserServiceException expected"); 
 		}
 		catch(TestUserServiceException e) { 
